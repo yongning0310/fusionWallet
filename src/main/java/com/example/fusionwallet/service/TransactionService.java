@@ -8,6 +8,7 @@ import com.example.fusionwallet.repository.BalanceRepository;
 import com.example.fusionwallet.repository.TransactionRepository;
 import com.example.fusionwallet.repository.UserRepository;
 import com.example.fusionwallet.repository.WalletRepository;
+import jakarta.transaction.UserTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -50,9 +51,9 @@ public class TransactionService {
             Credentials from_credential = Credentials.create(foundWallet.getPrivateKey());
 
             // Transfer ETH to reserve
-            Web3j web3 = Web3j.build(new HttpService());  // defaults to http://localhost:8545/
+            Web3j web3 = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/HrX79z1T6WqOYQWPivmEvr4ZJbtqoGcz"));  // defaults to http://localhost:8545/
             TransactionReceipt transactionReceipt = Transfer.sendFunds(
-                    web3, from_credential, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+                    web3, from_credential, "0x55A577185A249B7730712949171502eE9792A848",
                     BigDecimal.valueOf(transaction.getAmount()), Convert.Unit.ETHER).send();
             if (!transactionReceipt.isStatusOK()) return false;
 
@@ -66,6 +67,8 @@ public class TransactionService {
             to_user_cash_acc.setBalance(balance);
             userRepository.save(to);
             transaction.setDate(LocalDateTime.now());
+            transaction.setFrom_user(from_user.get());
+            transaction.setTo_user(to_user.get());
             transactionRepository.save(transaction);
             return true;
         }
