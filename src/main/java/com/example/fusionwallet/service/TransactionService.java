@@ -8,7 +8,6 @@ import com.example.fusionwallet.repository.BalanceRepository;
 import com.example.fusionwallet.repository.TransactionRepository;
 import com.example.fusionwallet.repository.UserRepository;
 import com.example.fusionwallet.repository.WalletRepository;
-import jakarta.transaction.UserTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -20,6 +19,7 @@ import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -47,21 +47,17 @@ public class TransactionService {
         if (to_user.isPresent() && from_user.isPresent()) {
             // Create credential for from user to sign transactions
             User from = from_user.get();
-            Wallet foundWallet = walletRepository.findByUser_IdOrderByIdAsc(from.getId()).get(0);
-            Credentials from_credential = Credentials.create(foundWallet.getPrivateKey());
+            Credentials from_credential = getUserCredentials(from);
 
             // Transfer ETH to reserve
-            Web3j web3 = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/HrX79z1T6WqOYQWPivmEvr4ZJbtqoGcz"));  // defaults to http://localhost:8545/
-            TransactionReceipt transactionReceipt = Transfer.sendFunds(
-                    web3, from_credential, "0x55A577185A249B7730712949171502eE9792A848",
-                    BigDecimal.valueOf(transaction.getAmount()), Convert.Unit.ETHER).send();
+            TransactionReceipt transactionReceipt = transferEth(from_credential, transaction.getAmount());
             if (!transactionReceipt.isStatusOK()) return false;
 
             // Increase balance of to user
             User to = to_user.get();
             Balance to_user_cash_acc = to.getBalances()
                     .stream().filter(balance ->
-                            balance.getCurrency() == "Cash").toList().get(0);
+                            Objects.equals(balance.getCurrency(), "Cash")).toList().get(0);
             double balance = to_user_cash_acc.getBalance();
             balance += transaction.getAmount() * price;
             to_user_cash_acc.setBalance(balance);
@@ -96,13 +92,22 @@ public class TransactionService {
 //        return false;
     }
 
-    public Boolean loan(Long id,double amount){
+    public Boolean loan(Long id, double amount, double eth_price) throws Exception {
         Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()){
+        if (user.isPresent()) {
+            // Create credential for from user to sign transactions
+            User from = user.get();
+            Credentials from_credential = getUserCredentials(from);
+
+            // Transfer ETH to reserve
+            TransactionReceipt transactionReceipt = transferEth(from_credential, amount);
+            if (!transactionReceipt.isStatusOK()) return false;
+
+            // Increment user balance
             Balance balance = user.get().getBalances()
                     .stream().filter(bal ->
-                            bal.getCurrency() == "Cash").toList().get(0);
-            balance.setBalance(balance.getBalance()+amount);
+                            Objects.equals(bal.getCurrency(), "Cash")).toList().get(0);
+            balance.setBalance(balance.getBalance() + amount * eth_price * 0.5);
             balanceRepository.save(balance);
             Transaction newtrans = new Transaction();
             newtrans.setAmount(amount);
@@ -114,5 +119,17 @@ public class TransactionService {
             return true;
         }
         return false;
+    }
+
+    private Credentials getUserCredentials(User user) {
+        Wallet foundWallet = walletRepository.findByUser_IdOrderByIdAsc(user.getId()).get(0);
+        return Credentials.create(foundWallet.getPrivateKey());
+    }
+
+    private TransactionReceipt transferEth(Credentials from, double amount) throws Exception {
+        Web3j web3 = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/HrX79z1T6WqOYQWPivmEvr4ZJbtqoGcz"));  // defaults to http://localhost:8545/
+        return Transfer.sendFunds(
+                web3, from, "0x55A577185A249B7730712949171502eE9792A848",
+                BigDecimal.valueOf(amount), Convert.Unit.ETHER).send();
     }
 }

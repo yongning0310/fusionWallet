@@ -79,9 +79,10 @@ public class TransactionController {
 
     @PostMapping("/loan/{loan_amount}")
     public ResponseEntity<?> loan(@PathVariable double loan_amount,
-                                @RequestParam Long user_id) {
+                                  @RequestParam Long user_id) {
         try {
-            if (transactionService.loan(user_id,loan_amount)){
+            double price = (double) getCryptoPrices("ethereum").getBody();
+            if (transactionService.loan(user_id, loan_amount, price)) {
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
