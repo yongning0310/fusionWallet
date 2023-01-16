@@ -127,7 +127,7 @@ public class TransactionService {
     }
 
     private TransactionReceipt transferEth(Credentials from, double amount) throws Exception {
-        Web3j web3 = Web3j.build(new HttpService());  // defaults to http://localhost:8545/
+        Web3j web3 = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/HrX79z1T6WqOYQWPivmEvr4ZJbtqoGcz"));  // defaults to http://localhost:8545/
         return Transfer.sendFunds(
                 web3, from, "0x55A577185A249B7730712949171502eE9792A848",
                 BigDecimal.valueOf(amount), Convert.Unit.ETHER).send();
