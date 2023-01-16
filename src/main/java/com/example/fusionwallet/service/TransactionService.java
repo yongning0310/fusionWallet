@@ -18,6 +18,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -64,9 +65,11 @@ public class TransactionService {
             balance += transaction.getAmount() * price;
             to_user_cash_acc.setBalance(balance);
             userRepository.save(to);
+            transactionRepository.save(transaction);
+            return true;
         }
+        return false;
 
-        return true;
 //        if (to_user.isPresent() && from_user.isPresent()){
 //
 //            if(transaction.getType() == "Cash"){
@@ -87,5 +90,25 @@ public class TransactionService {
 //
 //        }
 //        return false;
+    }
+
+    public Boolean loan(Long id,double amount){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()){
+            Balance balance = user.get().getBalances()
+                    .stream().filter(bal ->
+                            bal.getCurrency() == "Cash").toList().get(0);
+            balance.setBalance(balance.getBalance()+amount);
+            balanceRepository.save(balance);
+            Transaction newtrans = new Transaction();
+            newtrans.setAmount(amount);
+            newtrans.setDate(LocalDateTime.now());
+            newtrans.setType("Loan");
+            newtrans.setFrom_user(user.get());
+            newtrans.setToCurrency("Cash");
+            transactionRepository.save(newtrans);
+            return true;
+        }
+        return false;
     }
 }

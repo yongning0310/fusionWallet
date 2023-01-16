@@ -35,7 +35,7 @@ public class Transaction {
     @Column(name = "to_currency")
     private String toCurrency;
 
-    // deposit,withdrawal,transfer
+    // deposit,withdraw,transfer, loan
     @Column(name = "type", nullable = false)
     private String type;
 

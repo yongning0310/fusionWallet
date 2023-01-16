@@ -48,4 +48,47 @@ public class TransactionController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+//    @PostMapping("/deposit")
+//    public ResponseEntity<?> deposit(@RequestParam Long user_id) {
+//        try {
+//            if (transactionService.deposit(user_id)) {
+//                return new ResponseEntity<>(HttpStatus.OK);
+//            } else {
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//            }
+//            // only return wallet when calling wallet API
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//
+//    @PostMapping("/withdraw")
+//    public ResponseEntity<?> withdraw(@RequestParam Long user_id) {
+//        try {
+//            if (transactionService.withdraw(user_id)) {
+//                return new ResponseEntity<>(HttpStatus.OK);
+//            } else {
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//            }
+//            // only return wallet when calling wallet API
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+//    }
+
+    @PostMapping("/loan/{loan_amount}")
+    public ResponseEntity<?> loan(@PathVariable double loan_amount,
+                                @RequestParam Long user_id) {
+        try {
+            if (transactionService.loan(user_id,loan_amount)){
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // only return wallet when calling wallet API
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
