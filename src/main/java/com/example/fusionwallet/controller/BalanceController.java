@@ -52,7 +52,7 @@ public class BalanceController {
 
                 // get eth balance
                 Wallet foundWallets = walletService.findAllByUserId(user_id).get(0);
-                Web3j web3 = Web3j.build(new HttpService());
+                Web3j web3 = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/HrX79z1T6WqOYQWPivmEvr4ZJbtqoGcz"));
                 EthGetBalance ethGetBalance = web3
                         .ethGetBalance(foundWallets.getPublicKey(), DefaultBlockParameterName.LATEST)
                         .sendAsync()
