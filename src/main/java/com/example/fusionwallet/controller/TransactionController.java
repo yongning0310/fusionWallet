@@ -37,7 +37,7 @@ public class TransactionController {
     public ResponseEntity<?> transfer(@RequestParam Long from_user_id, Long to_user_id,
                                       @RequestBody Transaction transaction) {
         try {
-            double price = Double. parseDouble((String) getCryptoPrices("ethereum").getBody());
+            double price = (double) getCryptoPrices("ethereum").getBody();
             if (transactionService.transfer(from_user_id, to_user_id, transaction, price)) {
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {
