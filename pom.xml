@@ -14,7 +14,7 @@
     <name>fusionWallet</name>
     <description>fusionWallet</description>
     <properties>
-        <java.runtime.version>19</java.runtime.version>
+        <java.runtime.version>17</java.runtime.version>
     </properties>
     <dependencies>
 
