@@ -26,9 +26,24 @@ public class UserController {
     private BalanceService balanceService;
 
     @GetMapping("/retrieve/{user_id}")
-    public ResponseEntity<?> getUser(@PathVariable Long user_id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long user_id) {
         try {
             Optional<User> foundUser = userService.findbyId(user_id);
+            if (foundUser.isPresent()) {
+                return new ResponseEntity<>(foundUser.get().userDto(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // only return wallet when calling wallet API
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/retrieve/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        try {
+            Optional<User> foundUser = userService.findbyEmail(email);
             if (foundUser.isPresent()) {
                 return new ResponseEntity<>(foundUser.get().userDto(), HttpStatus.OK);
             } else {
