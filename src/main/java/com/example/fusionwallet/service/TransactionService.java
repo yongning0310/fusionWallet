@@ -65,6 +65,7 @@ public class TransactionService {
             balance += transaction.getAmount() * price;
             to_user_cash_acc.setBalance(balance);
             userRepository.save(to);
+            transaction.setDate(LocalDateTime.now());
             transactionRepository.save(transaction);
             return true;
         }
