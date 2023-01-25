@@ -49,33 +49,51 @@ public class TransactionController {
         }
     }
 
-//    @PostMapping("/deposit")
-//    public ResponseEntity<?> deposit(@RequestParam Long user_id) {
-//        try {
-//            if (transactionService.deposit(user_id)) {
-//                return new ResponseEntity<>(HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//            // only return wallet when calling wallet API
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
-//    @PostMapping("/withdraw")
-//    public ResponseEntity<?> withdraw(@RequestParam Long user_id) {
-//        try {
-//            if (transactionService.withdraw(user_id)) {
-//                return new ResponseEntity<>(HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//            // only return wallet when calling wallet API
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PutMapping("/depositCash/{user_id}/{amount}")
+    public ResponseEntity<?> depositCash(@RequestParam Long user_id,
+                                         double amount) {
+        try {
+            if (transactionService.depositCash(user_id,amount)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // only return wallet when calling wallet API
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/withdrawCash/{user_id}/{amount}")
+    public ResponseEntity<?> withdrawCash(@PathVariable Long user_id,
+                                          double amount) {
+        try {
+            if (transactionService.withdrawCash(user_id,amount)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // only return wallet when calling wallet API
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/withdrawCrypto/{user_id}/{amount}")
+    public ResponseEntity<?> withdrawCrypto(@PathVariable Long user_id,
+                                            double amount) {
+        try {
+            double price = (double) getCryptoPrices("ethereum").getBody();
+            if (transactionService.withdrawCrypto(user_id,amount,price)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // only return wallet when calling wallet API
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @PostMapping("/loan/{loan_amount}")
     public ResponseEntity<?> loan(@PathVariable double loan_amount,

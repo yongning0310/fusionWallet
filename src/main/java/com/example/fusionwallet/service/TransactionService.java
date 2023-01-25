@@ -114,6 +114,7 @@ public class TransactionService {
             newtrans.setDate(LocalDateTime.now());
             newtrans.setType("Loan");
             newtrans.setFrom_user(user.get());
+            newtrans.setFromCurrency("ETH");
             newtrans.setToCurrency("Cash");
             transactionRepository.save(newtrans);
             return true;
@@ -132,4 +133,65 @@ public class TransactionService {
                 web3, from, "0x55A577185A249B7730712949171502eE9792A848",
                 BigDecimal.valueOf(amount), Convert.Unit.ETHER).send();
     }
+
+    public Boolean withdrawCash(Long id,double amount){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            Balance balance = user.get().getBalances()
+                    .stream().filter(bal ->
+                            Objects.equals(bal.getCurrency(), "Cash")).toList().get(0);
+            balance.setBalance(balance.getBalance() - amount);
+            balanceRepository.save(balance);
+            Transaction newtrans = new Transaction();
+            newtrans.setAmount(amount);
+            newtrans.setDate(LocalDateTime.now());
+            newtrans.setType("Withdraw in Cash");
+            newtrans.setFrom_user(user.get());
+            newtrans.setToCurrency("Cash");
+            transactionRepository.save(newtrans);
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean withdrawCrypto(Long id, double amount, double eth_price){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            Balance balance = user.get().getBalances()
+                    .stream().filter(bal ->
+                            Objects.equals(bal.getCurrency(), "Cash")).toList().get(0);
+            balance.setBalance(balance.getBalance() - amount *  eth_price);
+            balanceRepository.save(balance);
+            Transaction newtrans = new Transaction();
+            newtrans.setAmount(amount);
+            newtrans.setDate(LocalDateTime.now());
+            newtrans.setType("Withdraw in Cash");
+            newtrans.setFrom_user(user.get());
+            newtrans.setToCurrency("Cash");
+            transactionRepository.save(newtrans);
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean depositCash(Long id, double amount){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            Balance balance = user.get().getBalances()
+                    .stream().filter(bal ->
+                            Objects.equals(bal.getCurrency(), "Cash")).toList().get(0);
+            balance.setBalance(balance.getBalance() + amount);
+            balanceRepository.save(balance);
+            Transaction newtrans = new Transaction();
+            newtrans.setAmount(amount);
+            newtrans.setDate(LocalDateTime.now());
+            newtrans.setType("Deposit in Cash");
+            newtrans.setFrom_user(user.get());
+            newtrans.setToCurrency("Cash");
+            transactionRepository.save(newtrans);
+            return true;
+        }
+        return false;
+    }
+
 }
